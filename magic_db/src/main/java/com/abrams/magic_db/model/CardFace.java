@@ -18,7 +18,7 @@ public class CardFace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "face_id")
-    private Long faceId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "card_id", nullable = false)

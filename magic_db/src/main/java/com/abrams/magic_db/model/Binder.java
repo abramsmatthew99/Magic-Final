@@ -14,7 +14,7 @@ public class Binder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "binder_id")
-    private Long binderId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

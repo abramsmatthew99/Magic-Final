@@ -1,5 +1,7 @@
 package com.abrams.magic_db.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +19,7 @@ public class DeckCard {
 
     @ManyToOne
     @JoinColumn(name = "deck_id", nullable = false)
+    @JsonIgnore
     private Deck deck;
 
     @ManyToOne
