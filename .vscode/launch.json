@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-MagicDbApplication<magic_db>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.abrams.magic_db.MagicDbApplication",
+            "projectName": "magic_db",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
