@@ -2,6 +2,10 @@ package com.abrams.magic_db.controller;
 
 import com.abrams.magic_db.model.Binder;
 import com.abrams.magic_db.service.BinderService;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +21,15 @@ public class BinderController {
         this.binderService = binderService;
     }
 
-    // GET /api/binder/1
     @GetMapping("/{userId}")
-    public List<Binder> getUserBinder(@PathVariable Long userId) {
-        return binderService.getUserBinder(userId);
+    public Page<Binder> getUserBinder(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return binderService.searchUserBinder(userId, name, pageable);
     }
 
     // POST /api/binder/1/add?cardId=...&quantity=1
@@ -42,5 +51,12 @@ public class BinderController {
     ) {
         binderService.removeCardFromBinder(userId, cardId, quantity);
         return "Card removed successfully";
+    }
+
+
+    //  Check quantity of a specific card
+    @GetMapping("/{userId}/card/{cardId}")
+    public int getCardQuantity(@PathVariable Long userId, @PathVariable UUID cardId) {
+        return binderService.getCardQuantity(userId, cardId); 
     }
 }

@@ -6,6 +6,9 @@ import com.abrams.magic_db.model.User;
 import com.abrams.magic_db.repository.BinderRepository;
 import com.abrams.magic_db.repository.CardRepository;
 import com.abrams.magic_db.repository.UserRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,5 +71,19 @@ public class BinderService {
             binder.setQuantity(newQuantity);
             binderRepository.save(binder);
         }
+    }
+
+    public Page<Binder> searchUserBinder(Long userId, String name, Pageable pageable) {
+        if (name == null || name.trim().isEmpty()) {
+            return binderRepository.findByUserIdAndCardNameContainingIgnoreCase(userId, "", pageable); 
+        }
+        return binderRepository.findByUserIdAndCardNameContainingIgnoreCase(userId, name, pageable);
+    }
+
+    //Helper for deck Service
+    public int getCardQuantity(Long userId, UUID cardId) {
+        return binderRepository.findByUserIdAndCardId(userId, cardId)
+                .map(Binder::getQuantity)
+                .orElse(0);
     }
 }

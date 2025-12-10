@@ -33,6 +33,16 @@ public class DeckController {
         deckService.deleteDeck(deckId);
     }
 
+    @PutMapping("/{deckId}")
+    public Deck updateDeck(
+            @PathVariable Long deckId,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String format,
+            @RequestParam(required = false) String notes
+    ) {
+        return deckService.updateDeck(deckId, name, format, notes);
+    }
+
     @PostMapping("/{deckId}/add")
     public DeckCard addCardToDeck(
             @PathVariable Long deckId,
@@ -41,5 +51,26 @@ public class DeckController {
             @RequestParam(defaultValue = "false") boolean isSideboard
     ) {
         return deckService.addCardToDeck(deckId, cardId, quantity, isSideboard);
+    }
+
+    @DeleteMapping("/{deckId}/remove")
+    public void removeCardFromDeck(
+        @PathVariable Long deckId, 
+        @RequestParam UUID cardId, 
+        @RequestParam(defaultValue = "1") int quantity
+    ) {
+        deckService.removeCardFromDeck(deckId, cardId, quantity);
+    }
+
+    // Get Single Deck Details (for the Deck Builder page)
+    @GetMapping("/{deckId}")
+    public Deck getDeckById(@PathVariable Long deckId) {
+        return deckService.getDeckById(deckId); 
+    }
+
+    //Export Deck List (Text format)
+    @GetMapping("/{deckId}/export")
+    public String exportDeck(@PathVariable Long deckId) {
+        return deckService.exportDeck(deckId); 
     }
 }

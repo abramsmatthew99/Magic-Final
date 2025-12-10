@@ -17,17 +17,18 @@ public class CardService {
         this.cardRepository = cardRepository;
     }
 
-    // 1. Get a specific card (for the card details page)
+    //  Get a specific card (for the card details page)
     public Card getCardById(UUID id) {
         return cardRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Card not found with ID: " + id));
     }
 
-    // 2. Search cards by parts of name
+    //searching cards by name (refactor soon)
     public Page<Card> searchCards(String name, Pageable pageable) {
         if (name == null || name.trim().isEmpty()) {
             return cardRepository.findAll(pageable);
         }
         return cardRepository.findByNameContainingIgnoreCase(name, pageable);
     }
+    //TODO: Add other serach methods
 }
