@@ -26,7 +26,7 @@ public class ScryfallService {
     private final SetRepository setRepository;
     private final ObjectMapper objectMapper;
 
-    private static final String BULK_DATA_URL = "https://data.scryfall.io/default-cards/default-cards-20251209102920.json";
+    private static final String BULK_DATA_URL = "https://data.scryfall.io/oracle-cards/oracle-cards-20251210220808.json";
     private static final int BATCH_SIZE = 1000; // Save in chunks of 1000 for speed
 
     public ScryfallService(CardRepository cardRepository, SetRepository setRepository, ObjectMapper objectMapper) {
@@ -121,13 +121,15 @@ public class ScryfallService {
         if (node.has("card_faces")) {
             int index = 0;
             for (JsonNode faceNode : node.get("card_faces")) {
-                CardFace face = mapFace(faceNode);
+                // Pass parent 'node' for fallback image lookup
+                CardFace face = mapFace(faceNode, node);
                 face.setFaceIndex(index++);
                 face.setCard(card);
                 faces.add(face);
             }
         } else {
-            CardFace face = mapFace(node);
+            // Normal card: Pass null as parent since 'node' has everything
+            CardFace face = mapFace(node, null);
             face.setFaceIndex(0);
             face.setCard(card);
             faces.add(face);
@@ -137,7 +139,8 @@ public class ScryfallService {
         return card;
     }
 
-    private CardFace mapFace(JsonNode node) {
+    // Updated Signature: Accepts parentNode for fallback images
+    private CardFace mapFace(JsonNode node, JsonNode parentNode) {
         CardFace face = new CardFace();
         face.setName(getString(node, "name"));
         face.setManaCost(getString(node, "mana_cost"));
@@ -156,8 +159,12 @@ public class ScryfallService {
             face.setColors(colorList);
         }
 
+        // Image Logic: Check face first, then parent
         if (node.has("image_uris") && node.get("image_uris").has("normal")) {
             face.setImageUrl(node.get("image_uris").get("normal").asText());
+        } else if (parentNode != null && parentNode.has("image_uris") && parentNode.get("image_uris").has("normal")) {
+            // Fallback for Split cards where image is on the parent
+            face.setImageUrl(parentNode.get("image_uris").get("normal").asText());
         }
 
         return face;

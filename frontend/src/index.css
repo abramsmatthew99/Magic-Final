@@ -1,0 +1,65 @@
+:root {
+  /* Magic The Gathering Inspired Palette */
+  --bg-dark: #121212;
+  --bg-card: #1e1e1e;
+  --text-main: #e0e0e0;
+  --text-muted: #a0a0a0;
+  
+  /* Mana Colors */
+  --mana-white: #f8e7b9;
+  --mana-blue: #b3ceea;
+  --mana-black: #a69f9d;
+  --mana-red: #eb9f82;
+  --mana-green: #c4d3ca;
+  
+  /* UI Accents */
+  --accent-primary: #6c5ce7; /* Purple/Mystic */
+  --accent-hover: #a29bfe;
+  --border-color: #333;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* --- REUSABLE UTILITIES --- */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--accent-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Grid for Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
