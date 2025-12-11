@@ -1,0 +1,131 @@
+.decks-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.decks-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.decks-page-header h2 {
+    margin: 0;
+    color: var(--text-main);
+}
+
+.deck-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.deck-link {
+    font-weight: bold;
+    color: var(--accent-primary);
+    text-decoration: none;
+}
+
+.deck-link:hover {
+    text-decoration: underline;
+    color: var(--accent-hover);
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background-color 0.2s;
+}
+
+.btn-outline-primary {
+    background: transparent;
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    border-color: #666;
+    color: #ccc;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #666;
+    color: white;
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border-color: #ff4d4d;
+    color: #ff4d4d;
+}
+
+.btn-outline-danger:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: 1px solid var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}

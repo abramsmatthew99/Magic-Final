@@ -4,7 +4,6 @@ import com.abrams.magic_db.model.Card;
 import com.abrams.magic_db.model.Deck;
 import com.abrams.magic_db.model.DeckCard;
 import com.abrams.magic_db.model.User;
-import com.abrams.magic_db.repository.BinderRepository;
 import com.abrams.magic_db.repository.CardRepository;
 import com.abrams.magic_db.repository.DeckCardRepository;
 import com.abrams.magic_db.repository.DeckRepository;
@@ -17,7 +16,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.management.RuntimeErrorException;
 
 @Service
 public class DeckService {
@@ -37,9 +35,6 @@ public class DeckService {
         this.binderService = binderService;
     }
 
-    public List<Deck> getUserDecks(Long userId) {
-        return deckRepository.findByUserId(userId);
-    }
 
     public Deck createDeck(Long userId, String name, String format) {
         User user = userRepository.findById(userId)
@@ -178,5 +173,28 @@ public class DeckService {
         }
 
         return sb.toString();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Deck> getUserDecks(Long userId) {
+        List<Deck> decks = deckRepository.findByUserId(userId);
+        
+        // Calculate total card count for each deck
+        for (Deck deck : decks) {
+            int total = deck.getCards().stream()
+                             .mapToInt(DeckCard::getQuantity)
+                             .sum();
+            deck.setCardCount(total);
+        }
+        
+        return decks;
+    }
+
+    @Transactional
+    public void transferCardBetweenDecks(Long sourceDeckId, Long destDeckId, UUID cardId, int quantity) {
+        if (quantity <= 0) throw new IllegalArgumentException("Transfer quantity must be positive.");
+        if (sourceDeckId.equals(destDeckId)) throw new RuntimeException("Source and destination decks cannot be the same.");
+        removeCardFromDeck(sourceDeckId, cardId, quantity);
+        addCardToDeck(destDeckId, cardId, quantity, false);
     }
 }

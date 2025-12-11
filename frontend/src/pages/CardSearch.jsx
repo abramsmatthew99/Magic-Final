@@ -1,21 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { searchCards } from '../services/api';
-import './CardSearch.css'; 
+import { searchCards, addCardToBinder, getCardQuantity } from '../services/api';
+import GenericModal from '../components/GenericModal';
+import CardLayout from '../components/CardLayout';
 
 const CardSearch = () => {
+    // --- SEARCH STATE ---
     const [cards, setCards] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
-    
-    // Pagination State
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
-    const pageSize = 20; // Default page size
+    const pageSize = 20;
 
-    // Trigger search on mount and when page changes
+    // --- BINDER STATE ---
+    const [ownedQuantities, setOwnedQuantities] = useState({});
+    
+    // Modal State
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [selectedCard, setSelectedCard] = useState(null);
+    const [addQuantity, setAddQuantity] = useState(1);
+    
+    // Hardcoded User ID for now
+    const userId = 2;
+
+    // 1. Fetch Cards on Page Change
     useEffect(() => {
         performSearch();
     }, [page]); 
+
+    // 2. Fetch Ownership when Cards Change
+    useEffect(() => {
+        if (cards.length > 0) {
+            fetchOwnershipCounts();
+        }
+    }, [cards]);
 
     const performSearch = async () => {
         setLoading(true);
@@ -23,86 +41,112 @@ const CardSearch = () => {
             const response = await searchCards(searchTerm, page, pageSize);
             setCards(response.data.content);
             setTotalPages(response.data.totalPages);
+            setOwnedQuantities({});
         } catch (error) {
             console.error("Error searching cards:", error);
         }
         setLoading(false);
     };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        setPage(0); // Reset to first page for new searches
-        performSearch();
+    const fetchOwnershipCounts = async () => {
+        const newQuantities = {};
+        await Promise.all(cards.map(async (card) => {
+            try {
+                const response = await getCardQuantity(userId, card.id);
+                newQuantities[card.id] = response.data; 
+            } catch (err) {
+                console.warn(`Failed to fetch quantity for ${card.name}`, err);
+            }
+        }));
+        setOwnedQuantities(newQuantities);
     };
 
-    return (
-        <div className="search-page">
-            {/* SEARCH BAR SECTION */}
-            <div className="search-header">
-                <form onSubmit={handleSearchSubmit} className="search-form">
-                    <input 
-                        type="text" 
-                        className="search-input"
-                        placeholder="Search for a card (e.g. 'Lotus')..." 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <button className="btn btn-primary" type="submit">Search</button>
-                </form>
-            </div>
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (page === 0) performSearch();
+        else setPage(0);
+    };
 
-            {/* PAGINATION TOP */}
-            <div className="pagination-controls">
-                <button 
-                    className="btn btn-secondary" 
-                    disabled={page === 0} 
-                    onClick={() => setPage(p => p - 1)}
-                >
-                    &laquo; Previous
-                </button>
-                <span className="page-info">Page {page + 1} of {totalPages || 1}</span>
-                <button 
-                    className="btn btn-secondary" 
-                    disabled={page >= totalPages - 1} 
-                    onClick={() => setPage(p => p + 1)}
-                >
-                    Next &raquo;
-                </button>
-            </div>
+    // --- ADD TO BINDER HANDLERS ---
+    const openAddModal = (card) => {
+        setSelectedCard(card);
+        setAddQuantity(1);
+        setShowAddModal(true);
+    };
 
-            {/* RESULTS GRID */}
-            {loading ? (
-                <div className="loading-spinner">Loading Cards...</div>
-            ) : (
-                <div className="card-grid">
-                    {cards.map(card => {
-                        // Logic to find a valid image (Front face or first face)
-                        let imageUrl = "https://via.placeholder.com/250x350?text=No+Image";
-                        if (card.faces && card.faces.length > 0 && card.faces[0].imageUrl) {
-                            imageUrl = card.faces[0].imageUrl;
-                        }
+    const handleAddToBinder = async (e) => {
+        e.preventDefault();
+        if (!selectedCard) return;
 
-                        return (
-                            <div className="magic-card" key={card.id}>
-                                <div className="card-image-wrapper">
-                                    <img src={imageUrl} alt={card.name} loading="lazy" />
-                                </div>
-                                <div className="card-info">
-                                    <h3>{card.name}</h3>
-                                    <p>{card.rarity} • {card.setCode?.toUpperCase()}</p>
-                                    <button className="btn btn-add">+ Add</button>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+        try {
+            await addCardToBinder(userId, selectedCard.id, parseInt(addQuantity));
+            alert(`Added ${addQuantity}x ${selectedCard.name} to Binder!`);
             
-            {/* PAGINATION BOTTOM (Optional, repeated for UX) */}
-            <div className="pagination-controls bottom">
-                 {/* (Same buttons as above if desired) */}
-            </div>
-        </div>
+            setOwnedQuantities(prev => ({
+                ...prev,
+                [selectedCard.id]: (prev[selectedCard.id] || 0) + parseInt(addQuantity)
+            }));
+            
+            setShowAddModal(false);
+        } catch (error) {
+            console.error("Error adding to binder:", error);
+            alert("Failed to add card.");
+        }
+    };
+
+    // Prepare cards with quantity for CardLayout
+    const cardsWithQuantity = cards.map(card => ({
+        ...card,
+        quantity: ownedQuantities[card.id] || 0
+    }));
+
+    return (
+        <>
+            <CardLayout 
+                title="Card Database"
+                searchTerm={searchTerm}
+                onSearchTermChange={setSearchTerm}
+                onSearchSubmit={handleSearchSubmit}
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                loading={loading}
+                cards={cardsWithQuantity}
+                renderCardActions={(card) => (
+                    <button 
+                        className="btn btn-add"
+                        onClick={() => openAddModal(card)}
+                    >
+                        + Add to Binder
+                    </button>
+                )}
+            />
+
+            {/* --- ADD TO BINDER MODAL --- */}
+            <GenericModal 
+                show={showAddModal} 
+                onClose={() => setShowAddModal(false)} 
+                title={`Add ${selectedCard?.name} to Binder`}
+            >
+                <form onSubmit={handleAddToBinder}>
+                    <div className="mb-3">
+                        <label className="form-label">Quantity</label>
+                        <input 
+                            type="number" 
+                            className="form-control" 
+                            value={addQuantity} 
+                            onChange={(e) => setAddQuantity(e.target.value)} 
+                            min="1" 
+                            required 
+                        />
+                    </div>
+                    <div className="d-flex justify-content-end gap-2">
+                        <button type="button" className="btn btn-secondary" onClick={() => setShowAddModal(false)}>Cancel</button>
+                        <button type="submit" className="btn btn-primary">Confirm Add</button>
+                    </div>
+                </form>
+            </GenericModal>
+        </>
     );
 };
 

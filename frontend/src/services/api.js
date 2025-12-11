@@ -68,4 +68,9 @@ export const moveCardToSideboard = (deckId, cardId, toSideboard) => {
     return api.put(`/decks/${deckId}/sideboard?cardId=${cardId}&toSideboard=${toSideboard}`);
 };
 
+export const getUserDetails = (userId) => api.get(`/users/${userId}`);
+
+export const transferCardBetweenDecks = (sourceId, destId, cardId, quantity) => 
+    api.put(`/decks/transfer?sourceId=${sourceId}&destId=${destId}&cardId=${cardId}&quantity=${quantity}`);
+
 export default api;

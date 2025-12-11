@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
 
+import javax.management.DescriptorKey;
+
 @Entity
 @Table(name = "decks")
 @Data
@@ -34,4 +36,7 @@ public class Deck {
 
     @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeckCard> cards;
+
+    @Transient
+    private Integer cardCount;
 }

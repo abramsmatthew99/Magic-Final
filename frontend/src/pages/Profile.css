@@ -1,0 +1,79 @@
+.profile-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.profile-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    color: var(--text-main);
+}
+
+.profile-card h1 {
+    color: var(--accent-primary);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+}
+
+.profile-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.profile-detail:last-of-type {
+    border-bottom: none;
+}
+
+.profile-detail .label {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.profile-detail .value {
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+.profile-summary {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.profile-summary p {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.profile-summary ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.profile-summary li {
+    padding: 5px 0;
+    color: var(--text-muted);
+}
+
+.status-icon.success {
+    color: #4CAF50; /* Green checkmark */
+    margin-right: 8px;
+}
+
+.loading-message, .error-message {
+    text-align: center;
+    padding: 50px;
+    color: var(--text-muted);
+}

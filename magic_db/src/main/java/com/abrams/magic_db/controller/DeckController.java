@@ -73,4 +73,14 @@ public class DeckController {
     public String exportDeck(@PathVariable Long deckId) {
         return deckService.exportDeck(deckId); 
     }
+
+    @PutMapping("/transfer")
+    public void transferCard(
+        @RequestParam Long sourceId,
+        @RequestParam Long destId,
+        @RequestParam UUID cardId,
+        @RequestParam int quantity
+    ) {
+        deckService.transferCardBetweenDecks(sourceId, destId, cardId, quantity);
+    }
 }

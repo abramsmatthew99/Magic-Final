@@ -2,11 +2,11 @@
     padding-bottom: 50px;
 }
 
-/* Search Header */
 .search-header {
-    margin-bottom: 20px;
     display: flex;
     justify-content: center;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
 }
 
 .search-form {
@@ -18,15 +18,19 @@
 
 .search-input {
     flex: 1;
-    padding: 12px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #444;
     background-color: var(--bg-card);
     color: var(--text-main);
     font-size: 1.1rem;
 }
 
-/* Pagination */
+.search-input:focus {
+    outline: 2px solid var(--accent-primary);
+    border-color: transparent;
+}
+
 .pagination-controls {
     display: flex;
     justify-content: center;
@@ -38,6 +42,7 @@
 .btn-secondary {
     background-color: #333;
     color: var(--text-main);
+    border: 1px solid #555;
 }
 
 .btn-secondary:disabled {
@@ -45,73 +50,110 @@
     cursor: not-allowed;
 }
 
-/* Grid Layout */
-/* Note: .card-grid is already defined in index.css, but we can refine it here */
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive columns */
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
 }
 
-/* Individual Card Styling */
 .magic-card {
     background-color: var(--bg-card);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative; /* Ensure card is a positioning context */
 }
 
 .magic-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
     border-color: var(--accent-primary);
 }
 
 .card-image-wrapper {
     width: 100%;
-    height: 310px; /* Fixed height to keep grid uniform */
+    aspect-ratio: 63 / 88; 
     background-color: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative; /* <--- CRITICAL: Keeps the badge inside the image area */
+    overflow: hidden;
 }
 
 .card-image-wrapper img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Badge Styling to ensure it stays put */
+.card-quantity-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    z-index: 10;
 }
 
 .card-info {
-    padding: 15px;
+    padding: 12px;
     text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .card-info h3 {
-    margin: 0 0 5px 0;
+    margin: 0;
     font-size: 1rem;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-main);
 }
 
 .card-info p {
+    margin: 5px 0 10px;
+    font-size: 0.8rem;
     color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-add {
     width: 100%;
-    background-color: transparent;
+    padding: 8px;
     border: 1px solid var(--accent-primary);
+    background: transparent;
     color: var(--accent-primary);
-    padding: 5px;
-    font-size: 0.9rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: auto;
 }
 
 .btn-add:hover {
-    background-color: var(--accent-primary);
-    color: white;
+    background: var(--accent-primary);
+    color: #fff;
+}
+
+.loading-spinner, .no-results {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    grid-column: 1 / -1;
 }
