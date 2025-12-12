@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -54,5 +55,14 @@ public class CardController {
     @GetMapping("/{id}")
     public Card getCardById(@PathVariable UUID id) {
         return cardService.getCardById(id);
+    }
+
+     /**
+     * * @param name The partial name used for suggestion matching.
+     * @return A list of up to 20 cards matching the partial name.
+     */
+    @GetMapping("/suggest")
+    public List<Card> getCardSuggestions(@RequestParam String name) {
+        return cardService.getSuggestions(name);
     }
 }

@@ -20,7 +20,7 @@ const CardSearch = () => {
         handleSearchTermChange,
         handleSearchSubmit,
         performSearch 
-    } = useCardSearch(false, userId, 20); //
+    } = useCardSearch(false, userId, 20); 
 
     const [ownedQuantities, setOwnedQuantities] = useState({});
     const [showAddModal, setShowAddModal] = useState(false);
@@ -42,8 +42,6 @@ const CardSearch = () => {
         await Promise.all(cards.map(async (card) => {
             try {
                 const response = await getCardQuantity(userId, card.id);
-                // Note: Cards retrieved from global search don't have a quantity field initially, 
-                // so we rely solely on getCardQuantity
                 newQuantities[card.id] = response.data; 
             } catch (err) {
                 console.warn(`Failed to fetch quantity for ${card.name}`, err);
@@ -63,8 +61,7 @@ const CardSearch = () => {
         if (!selectedCard) return;
 
         try {
-            await addCardToBinder(userId, selectedCard.id, parseInt(addQuantity));
-            alert(`Added ${addQuantity}x ${selectedCard.name} to Binder!`);
+            await addCardToBinder(userId, selectedCard.id, parseInt(addQuantity));  
             
             setOwnedQuantities(prev => ({
                 ...prev,
@@ -148,7 +145,7 @@ const CardSearch = () => {
                 title="Advanced Search Syntax"
             >
                 <p style={{color: 'var(--text-muted)'}}>
-                    You can filter by multiple criteria (AND logic) using keyword:value pairs. 
+                    You can filter by multiple criteria (AND only logic) using keyword:value pairs. 
                     Any text not matching a keyword will be searched against the Card Name.
                 </p>
                 <table className="syntax-table" style={{width: '100%', borderCollapse: 'collapse', marginTop: '15px'}}>

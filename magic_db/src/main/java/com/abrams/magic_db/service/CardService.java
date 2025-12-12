@@ -101,4 +101,18 @@ public class CardService {
 
         return cardRepository.findAll(spec, pageable);
     }
+
+     /**
+     * Finds the top 20 cards whose name partially matches the search term.
+     * Used exclusively for autosuggestion features (like in Deck Builder).
+     * @param nameQuery The partial name to search for.
+     * @return A list of up to 20 matching cards.
+     */
+    public List<Card> getSuggestions(String nameQuery) {
+        if (nameQuery == null || nameQuery.trim().isEmpty()) {
+            // Return an empty list if there's no input to search against
+            return List.of(); 
+        }
+        return cardRepository.findTop20ByNameContainingIgnoreCase(nameQuery);
+    }
 };

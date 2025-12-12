@@ -8,7 +8,8 @@ import {
     moveCardToSideboard,
     updateDeck,
     getUserDecks,
-    transferCardBetweenDecks 
+    transferCardBetweenDecks,
+    getCardSuggestions 
 } from '../services/api';
 import GenericModal from '../components/GenericModal';
 import './DeckBuilder.css'; 
@@ -56,6 +57,7 @@ const DeckBuilder = () => {
         loadAllUserDecks(); 
     }, [deckId]);
 
+    // Load Deck and Card Details
     const loadDeckDetails = async () => {
         setLoadingDeck(true);
         try {
@@ -76,7 +78,6 @@ const DeckBuilder = () => {
     const loadAllUserDecks = async () => {
         try {
             const response = await getUserDecks(userId);
-            // Filter out the current deck we are editing
             const filteredDecks = response.data.filter(d => d.id !== parseInt(deckId));
             setOtherDecks(filteredDecks);
         } catch (error) {
@@ -97,8 +98,24 @@ const DeckBuilder = () => {
     const fetchSuggestions = async (query) => {
         setLoadingSearch(true);
         try {
-            const response = await getUserBinder(userId, query, 0, 10);
-            setSearchResults(response.data.content);
+            const suggestionResponse = await getCardSuggestions(query);
+            const rawCards = suggestionResponse.data;
+
+            const resultsWithQuantities = await Promise.all(
+                rawCards.map(async (card) => {
+                    const binderResponse = await getUserBinder(userId, card.name, null, null, null, null, null, 0, 1);
+                    const binderEntry = binderResponse.data.content[0];
+                    
+                    return {
+                        card: card,
+                        quantity: binderEntry ? binderEntry.quantity : 0 
+                    };
+                })
+            );
+
+            const ownedResults = resultsWithQuantities.filter(item => item.quantity > 0);
+
+            setSearchResults(ownedResults);
             setShowResults(true);
         } catch (error) {
             console.error("Error fetching suggestions:", error);
@@ -107,6 +124,7 @@ const DeckBuilder = () => {
             setLoadingSearch(false);
         }
     };
+
 
     const openTransferModal = (deckCard) => {
         setCardToTransfer(deckCard);
@@ -130,11 +148,20 @@ const DeckBuilder = () => {
             alert(`Invalid quantity. Available: ${availableInSource}`);
             return;
         }
+        
+        console.log("Attempting Transfer with Payload:");
+        console.log({ sourceDeckId, destDeckId, cardId, amount, availableInSource });
+        
+        if (isNaN(destDeckId) || !transferData.destinationDeckId) {
+             console.error("Transfer aborted: Invalid Destination Deck ID selected.");
+             alert("Transfer failed: Please select a valid destination deck.");
+             return;
+        }
+
 
         try {
             await transferCardBetweenDecks(sourceDeckId, destDeckId, cardId, amount);
             
-            alert(`Successfully moved ${amount}x ${cardToTransfer.card.name} to new deck.`);
 
             setShowTransferModal(false);
             setCardToTransfer(null);
@@ -165,8 +192,6 @@ const DeckBuilder = () => {
                 item.card.id === card.id ? { ...item, quantity: item.quantity - 1 } : item
             ).filter(item => item.quantity > 0)); 
             
-            setSearchTerm(''); 
-            alert(`Added 1x ${card.name} to ${isSideboard ? 'Sideboard' : 'Main Deck'}!`);
             
         } catch (error) {
             console.error("Failed to add card:", error);

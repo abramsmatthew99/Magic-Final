@@ -19,6 +19,9 @@ export const searchCards = (name, oracleText, rarity, setCode, cmc, typeLine, pa
 
     return api.get(url);
 };
+export const getCardSuggestions = (name) => {
+    return api.get(`/cards/suggest?name=${encodeURIComponent(name)}`);
+};
 
 // --- BINDER API ---
 export const getUserBinder = (userId, name, oracleText, rarity, setCode, cmc, typeLine, page, size) => {
