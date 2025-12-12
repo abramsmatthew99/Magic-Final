@@ -1,5 +1,4 @@
 :root {
-  /* Magic The Gathering Inspired Palette */
   --bg-dark: #121212;
   --bg-card: #1e1e1e;
   --text-main: #e0e0e0;
@@ -16,6 +15,8 @@
   --accent-primary: #6c5ce7; /* Purple/Mystic */
   --accent-hover: #a29bfe;
   --border-color: #333;
+  --color-success: #28a745;
+  --color-danger: #ff4d4d;
 }
 
 body {
@@ -31,7 +32,6 @@ a {
   color: inherit;
 }
 
-/* --- REUSABLE UTILITIES --- */
 
 .container {
   max-width: 1200px;
@@ -46,6 +46,7 @@ a {
   cursor: pointer;
   font-weight: bold;
   transition: background 0.2s;
+  text-align: center;
 }
 
 .btn-primary {
@@ -57,9 +58,116 @@ a {
   background-color: var(--accent-hover);
 }
 
-/* Grid for Cards */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+
+.btn-success-action {
+    background: transparent;
+    border: 1px solid var(--color-success);
+    color: var(--color-success);
+}
+.btn-success-action:hover {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.btn-danger-action {
+    background: transparent;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+}
+.btn-danger-action:hover {
+    background-color: var(--color-danger);
+    color: white;
+}
+.btn-danger-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--color-danger);
+}
+
+
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
+  margin-top: 20px;
+}
+
+.magic-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.card-image-wrapper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.magic-card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.card-quantity-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.card-info h3 {
+    font-size: 1.1rem;
+    margin: 5px 0 2px 0;
+    line-height: 1.2;
+}
+
+.card-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0 0 10px 0;
+}
+
+/* Pagination Styles (used in CardLayout) */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    gap: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+.page-info {
+    font-weight: bold;
+    color: var(--accent-primary);
 }

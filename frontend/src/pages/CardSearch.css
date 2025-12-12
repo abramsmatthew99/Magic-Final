@@ -52,9 +52,10 @@
 
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 280px)); 
     gap: 20px;
     padding: 20px 0;
+    justify-content: center;
 }
 
 .magic-card {
@@ -67,7 +68,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    position: relative; /* Ensure card is a positioning context */
+    position: relative; 
+    width: 100%; 
 }
 
 .magic-card:hover {
@@ -80,7 +82,7 @@
     width: 100%;
     aspect-ratio: 63 / 88; 
     background-color: #000;
-    position: relative; /* <--- CRITICAL: Keeps the badge inside the image area */
+    position: relative;
     overflow: hidden;
 }
 
@@ -90,7 +92,6 @@
     object-fit: cover;
 }
 
-/* Badge Styling to ensure it stays put */
 .card-quantity-badge {
     position: absolute;
     top: 10px;

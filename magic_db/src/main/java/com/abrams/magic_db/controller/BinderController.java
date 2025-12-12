@@ -25,10 +25,14 @@ public class BinderController {
     }
 
     /**
-     * Retrieves a paginated and searchable view of a user's binder.
-     * Used by the Binder page and the Deck Builder's autosuggest search.
-     * * @param userId The ID of the user whose binder to retrieve.
+     * Retrieves a paginated and searchable view of a user's binder, supporting all advanced search criteria.
+     * @param userId The ID of the user whose binder to retrieve.
      * @param name Optional search term for card name.
+     * @param oracleText Optional search term for rules text.
+     * @param rarity Optional filter for rarity.
+     * @param setCode Optional filter for set code.
+     * @param cmc Optional filter for converted mana cost.
+     * @param typeLine Optional filter for type line.
      * @param page The page number (default 0).
      * @param size The number of items per page (default 20).
      * @return A {@link Page} of {@link Binder} entries.
@@ -37,23 +41,16 @@ public class BinderController {
     public Page<Binder> getUserBinder(
             @PathVariable Long userId,
             @RequestParam(required = false) String name,
+            @RequestParam(required = false) String oracleText,
+            @RequestParam(required = false) String rarity,
+            @RequestParam(required = false) String setCode,
+            @RequestParam(required = false) Integer cmc,
+            @RequestParam(required = false) String typeLine,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return binderService.searchUserBinder(userId, name, pageable);
-    }
-
-    /**
-     * Retrieves the quantity of a specific card owned by the user.
-     * Used primarily by the Card Search page to display ownership badges.
-     * * @param userId The ID of the user.
-     * @param cardId The UUID of the card printing.
-     * @return The integer quantity of the card owned.
-     */
-    @GetMapping("/{userId}/card/{cardId}")
-    public int getCardQuantity(@PathVariable Long userId, @PathVariable UUID cardId) {
-        return binderService.getCardQuantity(userId, cardId); 
+        return binderService.searchUserBinder(userId, name, oracleText, rarity, setCode, cmc, typeLine, pageable);
     }
 
     /**
@@ -87,5 +84,17 @@ public class BinderController {
     ) {
         binderService.removeCardFromBinder(userId, cardId, quantity);
         return "Card removed successfully";
+    }
+
+
+    /**
+     * Retrieves the quantity of a specific card owned by the user.
+     * * @param userId The ID of the user.
+     * @param cardId The UUID of the card printing.
+     * @return The integer quantity of the card owned.
+     */
+    @GetMapping("/{userId}/card/{cardId}")
+    public int getCardQuantity(@PathVariable Long userId, @PathVariable UUID cardId) {
+        return binderService.getCardQuantity(userId, cardId); 
     }
 }
