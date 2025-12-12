@@ -110,8 +110,6 @@ const CardSearch = () => {
                     </button>
                 )}
             >
-                
-
             </CardLayout>
 
             

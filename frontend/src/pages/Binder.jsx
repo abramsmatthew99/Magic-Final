@@ -87,7 +87,7 @@ const Binder = () => {
                         className="btn-danger-action" 
                         style={qtyButtonStyle}
                         onClick={() => handleQuantityChange(binderEntry, -1)}
-                        disabled={binderEntry.quantity <= 1} 
+                        disabled={binderEntry.quantity <= 0} 
                     >
                         -
                     </button>

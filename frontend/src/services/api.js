@@ -27,7 +27,6 @@ export const getCardSuggestions = (name) => {
 export const getUserBinder = (userId, name, oracleText, rarity, setCode, cmc, typeLine, page, size) => {
     let url = `/binder/${userId}?page=${page}&size=${size}`;
     
-    // Append parameters only if they are present (non-null/undefined/empty)
     if (name) url += `&name=${encodeURIComponent(name)}`;
     if (oracleText) url += `&oracleText=${encodeURIComponent(oracleText)}`;
     if (rarity) url += `&rarity=${encodeURIComponent(rarity)}`;
