@@ -17,6 +17,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
+/**
+ * Service class for managing all business logic related to {@link Deck}s, 
+ * including creation, deletion, content management, and atomic card transfers.
+ * This service coordinates with the {@link BinderService} for inventory control.
+ */
 @Service
 public class DeckService {
 
@@ -35,7 +40,46 @@ public class DeckService {
         this.binderService = binderService;
     }
 
+    /**
+     * Retrieves all decks belonging to a specific user, calculating the current card count 
+     * for each deck before returning.
+     * * @param userId The ID of the user.
+     * @return A list of {@link Deck} objects with the card count populated.
+     */
+    @Transactional(readOnly = true)
+    public List<Deck> getUserDecks(Long userId) {
+        List<Deck> decks = deckRepository.findByUserId(userId);
+        
+        // Calculate total card count for each deck with lots of chained functions, enjoy reading, sorry
+        for (Deck deck : decks) {
+            int total = deck.getCards().stream()
+                             .mapToInt(DeckCard::getQuantity)
+                             .sum();
+            deck.setCardCount(total);
+        }
+        
+        return decks;
+    }
+    
+    /**
+     * Retrieves a single deck by ID.
+     * * @param deckId The ID of the deck.
+     * @return The requested {@link Deck}.
+     * @throws RuntimeException if the deck is not found.
+     */
+    public Deck getDeckById(Long deckId) {
+        return deckRepository.findById(deckId)
+            .orElseThrow(() -> new RuntimeException("Deck not found"));
+    }
 
+    /**
+     * Creates a new deck for a user.
+     * * @param userId The ID of the user.
+     * @param name The name of the new deck.
+     * @param format The format of the new deck.
+     * @return The newly created {@link Deck}.
+     * @throws RuntimeException if the User is not found.
+     */
     public Deck createDeck(Long userId, String name, String format) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -47,13 +91,17 @@ public class DeckService {
         return deckRepository.save(deck);
     }
 
-    //DELETE THE WHOLE DECK 
+    /**
+     * Deletes an entire deck and returns all contained cards to the user's binder.
+     * * @param deckId The ID of the deck to delete.
+     * @throws RuntimeException if the deck is not found.
+     */
     @Transactional
     public void deleteDeck(Long deckId) {
         
         Deck deck = getDeckById(deckId);
 
-        //  Return cards to binder
+        // Return cards to binder
         for (DeckCard deckCard : deck.getCards()) {
             binderService.addCardToBinder(
                 deck.getUser().getId(), 
@@ -64,7 +112,16 @@ public class DeckService {
         deckRepository.delete(deck);
     }
 
-    //ADD CARD TO DECK IN ANY QUANTITY
+    /**
+     * Adds a card to a deck in a specified quantity. This is a transactional operation
+     * that consumes the card quantity from the user's binder.
+     * * @param deckId The ID of the deck to modify.
+     * @param cardId The UUID of the card printing.
+     * @param quantity The amount to add.
+     * @param isSideboard Flag indicating placement in the sideboard.
+     * @return The updated or newly created {@link DeckCard} entry.
+     * @throws RuntimeException if capacity is exceeded, card/deck is not found, or not enough cards in binder.
+     */
     @Transactional
     public DeckCard addCardToDeck(Long deckId, UUID cardId, int quantity, boolean isSideboard) {
         Deck deck = getDeckById(deckId);
@@ -72,7 +129,7 @@ public class DeckService {
                 .orElseThrow(() -> new RuntimeException("Card not found"));
         
 
-        //Capacity Check 
+        // Capacity Check 
         int currentSize = deck.getCards().stream()
                 .mapToInt(DeckCard::getQuantity)
                 .sum();
@@ -81,13 +138,14 @@ public class DeckService {
             throw new RuntimeException("Deck capacity exceeded!");
         }
 
+        // Inventory Check
         int owned = binderService.getCardQuantity(deck.getUser().getId(), cardId);
         if (owned < quantity) throw new RuntimeException("Not enough cards in your binder to add to the deck");
 
-        //Remove the card from the binder
+        // Remove the card from the binder (consumes inventory)
         binderService.removeCardFromBinder(deck.getUser().getId(), cardId, quantity);
 
-        //Now we can actually add it
+        // Now we can actually add it
         Optional<DeckCard> existing = deckCardRepository.findByDeckIdAndCardId(deckId, cardId);
 
         if (existing.isPresent()) {
@@ -104,13 +162,20 @@ public class DeckService {
         }
     }
 
-    //REMOVE UNIQUE CARD FROM DECK IN ANY QUANTITY
+    /**
+     * Removes a card from a deck in a specified quantity. Inventory is returned to the binder.
+     * * @param deckId The ID of the deck to modify.
+     * @param cardId The UUID of the card printing.
+     * @param quantity The amount to remove.
+     * @throws IllegalArgumentException if quantity is not positive.
+     * @throws RuntimeException if the card is not found in the deck or quantity exceeds the deck's count.
+     */
     @Transactional
-    public void removeCardFromDeck(Long deckid, UUID cardId, int quantity) {
-        DeckCard deckCard = deckCardRepository.findByDeckIdAndCardId(deckid, cardId)
+    public void removeCardFromDeck(Long deckId, UUID cardId, int quantity) {
+        DeckCard deckCard = deckCardRepository.findByDeckIdAndCardId(deckId, cardId)
             .orElseThrow(() -> new RuntimeException("Card not found in deck!"));
         
-            //Quantity Checks
+            // Quantity Checks
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         if (deckCard.getQuantity() < quantity) {
             throw new RuntimeException("Cannot remove more cards than exist in the deck.");
@@ -133,7 +198,14 @@ public class DeckService {
         }
     }
 
-    //UPDATE
+    /**
+     * Updates the metadata (name, format, notes) of an existing deck.
+     * * @param deckId The ID of the deck.
+     * @param newName The new name.
+     * @param newFormat The new format.
+     * @param newNotes The new notes.
+     * @return The updated {@link Deck}.
+     */
     public Deck updateDeck(Long deckId, String newName, String newFormat, String newNotes) {
         Deck deck = getDeckById(deckId);
         
@@ -144,12 +216,11 @@ public class DeckService {
         return deckRepository.save(deck);
     }
 
-    public Deck getDeckById(Long deckId) {
-        return deckRepository.findById(deckId)
-            .orElseThrow(() -> new RuntimeException("Deck not found"));
-    }
-
-    //EXPORT FUNCTION maybe unnecessary but idk here it is
+    /**
+     * Generates a text representation of the deck list, separating main deck and sideboard.
+     * * @param deckId The ID of the deck to export.
+     * @return A string containing the formatted deck list.
+     */
      public String exportDeck(Long deckId) {
         Deck deck = getDeckById(deckId);
         
@@ -175,26 +246,24 @@ public class DeckService {
         return sb.toString();
     }
 
-    @Transactional(readOnly = true)
-    public List<Deck> getUserDecks(Long userId) {
-        List<Deck> decks = deckRepository.findByUserId(userId);
-        
-        // Calculate total card count for each deck
-        for (Deck deck : decks) {
-            int total = deck.getCards().stream()
-                             .mapToInt(DeckCard::getQuantity)
-                             .sum();
-            deck.setCardCount(total);
-        }
-        
-        return decks;
-    }
-
+    /**
+     * Atomically transfers a specified quantity of a card from one deck to another.
+     * This relies on the transactional properties of {@link #removeCardFromDeck} (returns to binder)
+     * and {@link #addCardToDeck} (consumes from binder, checks capacity).
+     * If the destination capacity check fails, the entire transaction rolls back, and the card stays in the source deck.
+     * * @param sourceDeckId The ID of the deck to remove the card from.
+     * @param destDeckId The ID of the deck to add the card to.
+     * @param cardId The UUID of the card printing being moved.
+     * @param quantity The amount to transfer.
+     * @throws IllegalArgumentException if quantity is not positive.
+     * @throws RuntimeException if source and destination are the same, or if any nested operation fails (e.g., capacity).
+     */
     @Transactional
     public void transferCardBetweenDecks(Long sourceDeckId, Long destDeckId, UUID cardId, int quantity) {
         if (quantity <= 0) throw new IllegalArgumentException("Transfer quantity must be positive.");
         if (sourceDeckId.equals(destDeckId)) throw new RuntimeException("Source and destination decks cannot be the same.");
-        removeCardFromDeck(sourceDeckId, cardId, quantity);
+
+        removeCardFromDeck(sourceDeckId, cardId, quantity);  
         addCardToDeck(destDeckId, cardId, quantity, false);
     }
 }
